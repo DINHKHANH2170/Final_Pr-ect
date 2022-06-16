@@ -85,7 +85,8 @@ char Sex[30];
 String status_;
 const char chu_In[] ="QWERTYUIOPASDFGHJKLZXCVBNM ,." ;
 const char chu_Thuong[] ="qwertyuiopasdfghjklzxcvbnm ,." ;
-const char so[] ="#d&_-123?@()=+456!*':%/789 ,.0" ;
+const char so[35] ={'#','d','&','_','-','1','2','3','?','@','(',')','=','+','4','5','6','!','*',':','%','/','7','8','9',',','.','0'};
+char temp_so;
 char chu[30];
 Goodix touch = Goodix();
 PulseOximeter pox;
@@ -321,11 +322,11 @@ void wifi_(){
             }
             flag_AddText = 0;
           }
-          if(flag_bpnhap == 1)
-          {
+//          if(flag_bpnhap == 1)
+//          {
             BAN_PHIM();
-            flag_bpnhap = 0;
-          }
+//            flag_bpnhap = 0;
+//          }
           if(flag_Display_ssid == 1)
           {
             tft.fillRect(100,5,600,290,RA8875_WHITE);
@@ -443,11 +444,11 @@ void wifi_(){
             }
             flag_AddText = 0;
           }
-          if(flag_bpnhap == 1)
-          {
+//          if(flag_bpnhap == 1)
+//          {
             BAN_PHIM();
-            flag_bpnhap = 0;
-          }
+//            flag_bpnhap = 0;
+//          }
           if(flag_Display_Pass == 1)
           {
             enter_Pass(SSID_Temp);
@@ -673,6 +674,7 @@ void BAN_PHIM()
   {
     if(flag_Caps == 0)
     {
+      xoa_toan(chu);
       copy(chu_Thuong,chu);
       tft.drawTriangle(40,412,33,420,48,420,RA8875_WHITE);
       tft.drawRect(35,420,10,8,RA8875_WHITE);
@@ -680,6 +682,7 @@ void BAN_PHIM()
     }
     else 
     {
+      xoa_toan(chu);
       copy(chu_In,chu);
       tft.fillTriangle(40,412,33,420,48,420,RA8875_WHITE);
       tft.fillRect(35,420,10,8,RA8875_WHITE);
@@ -721,7 +724,9 @@ void BAN_PHIM()
     for(int i = 0; i<26;i++)
     {
       if(i==0)
+      {
         phim2(i,320,so[i]);
+      }
       else if(0<i && i<5)
         phim3((120+(i-1)*50),320,so[i]);
       else if(4<i && i<9){
@@ -747,21 +752,21 @@ void BAN_PHIM()
     tft.textEnlarge(1);
     tft.textWrite(",");
     tft.textSetCursor(610, 448);
-    tft.textTransparent(RA8875_WHITE);
+    //tft.textTransparent(RA8875_WHITE);
     tft.textEnlarge(1);
     tft.textWrite(".");
     tft.drawRect(220,440,220,40,RA8875_WHITE);
     tft.drawRect(440,440,120,40,RA8875_WHITE);
     tft.textSetCursor(490,440);
-    tft.textTransparent(RA8875_WHITE);
+    //tft.textTransparent(RA8875_WHITE);
     tft.textEnlarge(1);
     tft.textWrite("0");
     tft.textSetCursor(35, 440);
-    tft.textTransparent(RA8875_WHITE);
+    //tft.textTransparent(RA8875_WHITE);
     tft.textEnlarge(1);
     tft.textWrite("abc");
     tft.textSetCursor(680, 445);
-    tft.textTransparent(RA8875_WHITE);
+    //tft.textTransparent(RA8875_WHITE);
     tft.textEnlarge(1);
     tft.textWrite("ENTER");
     tft.drawTriangle(744,415,734,423,744,430,RA8875_WHITE);
@@ -1150,7 +1155,7 @@ void GetData_()
     xoa_toan(Weight);
     xoa_toan(Sex);
     pox.shutdown();
-    Firebase.getString(firebaseData, "/Patient/"  + Doc_name + "/" + ID_User + "/name");
+    Firebase.getString(firebaseData, "/Patient/" + ID_User + "/name");
     Name_user = firebaseData.stringData();
     Name_user.toCharArray(NamePatient,(Name_user.length()+1));
     Firebase.getString(firebaseData, "/Patient/" + ID_User + "/age");
@@ -1177,7 +1182,7 @@ void SendData()
       if((Bpm_ != 0) && (Spo2_ != 0))
       {
            pox.shutdown();
-           Firebase.setFloat(firebaseData, "/Patient/" + +Doc_Name + "/" + ID_User + "/bpm", Bpm_);
+           Firebase.setFloat(firebaseData, "/Patient/" + ID_User + "/bpm", Bpm_);
            Firebase.setFloat(firebaseData, "/Patient/" + ID_User + "/spO2", Spo2_);
            if(90 < Spo2_ && Spo2_ < 96)
            {
@@ -1305,7 +1310,6 @@ void setup()
   tft.PWM1out(100);
   tft.fillScreen(RA8875_BLACK);
   tft.textMode();
-  tft.textEnlarge(5);
   GIAO_DIEN_2();
   Serial.print("Initializing pulse oximeter..");
    if (!pox.begin()) {
