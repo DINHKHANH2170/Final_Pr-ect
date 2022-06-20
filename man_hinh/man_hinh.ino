@@ -7,7 +7,7 @@
 #include <Wire.h>
 #include "Goodix.h"
 #include "MAX30100_PulseOximeter.h"
-#define REPORTING_PERIOD_MS     3000
+#define REPORTING_PERIOD_MS     5000
 #define INT_PIN 2
 #define RST_PIN 15
 #define LILYGO_LILYPI false  
@@ -52,6 +52,14 @@ int flag_Enter_SSID;
 int flag_level;
 int dem;
 int flag_get_;
+int flag_enter_login;
+int sellect_login;
+int save_login;
+int flag_Display_login;
+char name_doctor[30];
+char ID_patient[7];
+String S_name_doctor;
+String S_ID_patient;
 bool Level_1;
 bool Level_2;
 bool Level_3;
@@ -166,6 +174,7 @@ void IRAM_ATTR onTimer(){
 void get_SSID(int index,uint16_t Min_Columns_, uint16_t Max_Columns_, uint16_t Min_Row_, uint16_t Max_Row_){
     if(Min_Columns_ < Columns && Columns < Max_Columns_ && Min_Row_ < Row && Row < Max_Row_)
     {
+      //pox.update();
       flag_Display = 1;
       flag_Enter_Pass = 1;
       Min_Columns = 0;
@@ -179,6 +188,7 @@ void get_SSID(int index,uint16_t Min_Columns_, uint16_t Max_Columns_, uint16_t M
     }
 }
 void enter_Pass(char SSID_[]){
+//   pox.update();
    tft.fillRect(100,5,600,290,RA8875_WHITE);
    if(flag_connect == 0){
       tft.textEnlarge(2);
@@ -203,6 +213,7 @@ void enter_Pass(char SSID_[]){
    }
    else
    {
+      pox.update();
       int i;
       tft.textEnlarge(2);
       tft.textTransparent(RA8875_BLACK);
@@ -216,8 +227,8 @@ void enter_Pass(char SSID_[]){
       tft.drawRect(130,220,150,50,RA8875_BLACK);
       tft.textSetCursor(133,220);
       tft.textWrite("Cancel");
-      WiFi.begin(SSID_Temp,password);
       pox.shutdown();
+      WiFi.begin(SSID_Temp,password);
       for(int a = 0; a<20; a++){
         delay(500);
         if(WiFi.status() == WL_CONNECTED)
@@ -229,6 +240,7 @@ void enter_Pass(char SSID_[]){
           i = 0; 
       }
       pox.resume();
+      pox.update();
       xoa_toan(password);
       tft.textEnlarge(2);
       tft.textColor(RA8875_BLACK, RA8875_WHITE);
@@ -253,6 +265,7 @@ void connect_Wifi(){
   if(flag_Wifi == 1){
     if(connected_Wifi == 0){
       for (int i = 0; i < n; ++i) {
+        pox.update();
         Serial.println("dang thu hien");
         set_cursor(610,790,(i+1)*58,(i+1)*58+50);
         get_SSID(i,Min_Columns,Max_Columns,Min_Row,Max_Row);
@@ -285,6 +298,7 @@ void wifi_(){
       {
         if(flag_BP == 0)
         {
+          pox.update();
           tft.fillRect(100,5,600,290,RA8875_WHITE);
           tft.textEnlarge(2);
           tft.textTransparent(RA8875_BLACK);
@@ -330,6 +344,7 @@ void wifi_(){
           }
           if(flag_Display_ssid == 1)
           {
+            pox.update();
             tft.fillRect(100,5,600,290,RA8875_WHITE);
             tft.textEnlarge(2);
             tft.textTransparent(RA8875_BLACK);
@@ -352,6 +367,7 @@ void wifi_(){
             tft.textWrite(SSID_Temp);
             flag_Display_ssid = 0;
           }
+          pox.update();
           tft.textEnlarge(2);
           tft.textColor(RA8875_BLACK, RA8875_WHITE);
           tft.textSetCursor(137,156);
@@ -363,12 +379,14 @@ void wifi_(){
       }
       else
       {
+        pox.update();
         tft.textEnlarge(2);
         tft.textTransparent(RA8875_WHITE);
         tft.textSetCursor(0,0);
         tft.textWrite("<- WI-FI");
         tft.drawRect(695,0,100,40,RA8875_WHITE);
         if(flag_Wifi == 1){
+          pox.update();
           tft.drawRect(460,0,230,40,RA8875_WHITE);
           tft.textEnlarge(1);
           tft.textSetCursor(462,0);
@@ -401,14 +419,16 @@ void wifi_(){
                 buff4 = WiFi.SSID(i);
                 buff4.toCharArray(buff3,(buff4.length()+1));
                 copy(buff3,SSID_[i]);
-                //xoa_toan(buff3);
+                xoa_toan(buff3);
                 tft.textWrite(SSID_[i]);
                 delay(100);
               }  
               pox.resume(); 
+              pox.update();
           }
           else
           {
+                pox.update();
                 tft.textSetCursor(10, 58);
                 tft.textWrite(SSID_Temp);
                 tft.drawRect(550,58,250,50,RA8875_WHITE);
@@ -417,6 +437,7 @@ void wifi_(){
           }
         }
         else{
+          pox.update();
           tft.fillRect(697,2,96,36,RA8875_BLACK);
           tft.fillRect(697,2,48,36,RA8875_WHITE);
           tft.textSetCursor(50,100);
@@ -429,6 +450,10 @@ void wifi_(){
       }
   } 
   else{
+//        if(flag_get_ == 0)
+//        {
+//          pox.update();
+//        }
         if(flag_BP == 1)
         {
           if(flag_AddText == 1)
@@ -466,31 +491,35 @@ void wifi_(){
         }
         else
         {
+//          if(flag_get_ == 0)
+//          {
+//            pox.update();
+//          }
           enter_Pass(SSID_Temp);
         }
   }
 }
 
 void get_sensor(){
+      pox.update();
       Spo2_ =  pox.getSpO2();
       Bpm_ = pox.getHeartRate();
 }
 void display_sensor(){
+      pox.update();
       if(Spo2_ > 100) 
           Spo2_ = 99;
       if(Bpm_ > 100) 
           Bpm_ = 99;
       sprintf(Spo2_String,"%.0f",Spo2_);
       sprintf(Bpm_String,"%.0f",Bpm_);
-//      if(Spo2_ != Spo2_Temp){
-        if(Spo2_ == 0)
-          tft.fillRect(601,(400-(Spo2_Temp*3)-3),78,((Spo2_Temp*3)),RA8875_BLACK);
-        else{
-          tft.fillRect(601,(400-(Spo2_Temp*3)-3),78,((Spo2_Temp*3)),RA8875_BLACK);
-          tft.fillRect(601,(400-(Spo2_*3)-3),78,((Spo2_*3)),RA8875_BLUE);        
-        } 
-        Spo2_Temp = Spo2_;
-//      }
+      if(Spo2_ == 0)
+        tft.fillRect(601,(400-(Spo2_Temp*3)-3),78,((Spo2_Temp*3)),RA8875_BLACK);
+      else{
+        tft.fillRect(601,(400-(Spo2_Temp*3)-3),78,((Spo2_Temp*3)),RA8875_BLACK);
+        tft.fillRect(601,(400-(Spo2_*3)-3),78,((Spo2_*3)),RA8875_BLUE);        
+      } 
+      Spo2_Temp = Spo2_;
       tft.textEnlarge(1);
       tft.textColor(RA8875_WHITE, RA8875_BLUE);
       tft.textSetCursor(610, 200);
@@ -499,15 +528,13 @@ void display_sensor(){
       tft.textSetCursor(610, 200);
       tft.textWrite(Spo2_String);
       tft.textWrite("%"); 
-//      if(Bpm_ != Bpm_Temp){
-        if(Bpm_ == 0)
-          tft.fillRect(701,(400-(Bpm_Temp*3)-3),78,((Bpm_Temp*3)),RA8875_BLACK);
-        else{
-          tft.fillRect(701,(400-(Bpm_Temp*3)-3),78,((Bpm_Temp*3)),RA8875_BLACK);
-          tft.fillRect(701,(400-(Bpm_*3)-3),78,((Bpm_*3)),RA8875_BLUE);
-        }
-        Bpm_Temp = Bpm_;
-//      }
+      if(Bpm_ == 0)
+        tft.fillRect(701,(400-(Bpm_Temp*3)-3),78,((Bpm_Temp*3)),RA8875_BLACK);
+      else{
+        tft.fillRect(701,(400-(Bpm_Temp*3)-3),78,((Bpm_Temp*3)),RA8875_BLACK);
+        tft.fillRect(701,(400-(Bpm_*3)-3),78,((Bpm_*3)),RA8875_BLUE);
+      }
+      Bpm_Temp = Bpm_;
       tft.textColor(RA8875_WHITE, RA8875_BLUE);
       tft.textSetCursor(710, 200);
       tft.textWrite("    ");
@@ -515,9 +542,11 @@ void display_sensor(){
       tft.textSetCursor(710, 200);
       tft.textWrite(Bpm_String);
       SendData();
+      pox.update();
 }
 void change_Infor()
 {
+  pox.update();
   tft.textEnlarge(1);
   tft.textColor(RA8875_WHITE, RA8875_BLACK);
   tft.textSetCursor(180, 90);
@@ -528,8 +557,10 @@ void change_Infor()
   tft.textWrite("                                ");
   tft.textSetCursor(180, 210);
   tft.textWrite("                               ");
+  pox.update();
 }
 void Infor_Patient(){
+  pox.update();
   tft.textSetCursor(180, 95);
   tft.textWrite(NamePatient);
   tft.textSetCursor(180, 140);
@@ -538,8 +569,102 @@ void Infor_Patient(){
   tft.textWrite(Weight);
   tft.textSetCursor(180, 230);
   tft.textWrite(Sex);
+  pox.update();
+}
+void log_in()
+{
+  //pox.update();
+  tft.textEnlarge(1);
+  tft.textColor(RA8875_WHITE, RA8875_WHITE);
+  tft.textSetCursor(135, 82);
+  tft.textWrite("                            ");
+  tft.textSetCursor(135, 172);
+  tft.textWrite("                            ");
+  tft.textTransparent(RA8875_BLACK);
+  tft.textSetCursor(135, 82);
+  tft.textWrite(name_doctor);
+  tft.textSetCursor(135, 172);
+  tft.textWrite(ID_patient);
+  tft.fillRect(100,5,600,290,RA8875_WHITE);
+  tft.textEnlarge(1);
+  tft.textTransparent(RA8875_BLACK);
+  tft.textSetCursor(290,5);
+  tft.textWrite("LOG IN ACCOUNT");
+  tft.textSetCursor(130,45);
+  tft.textWrite("Enter name doctor");
+  tft.drawRect(133,80,494,40,RA8875_BLACK);
+  tft.textSetCursor(130,135);
+  tft.textWrite("Enter ID patient");
+  tft.drawRect(133,170,494,40,RA8875_BLACK);
+  tft.drawRect(315,230,170,40,RA8875_BLACK);
+  tft.textSetCursor(357,232);
+  tft.textWrite("LOGIN");
+}
+void enter_login()
+{
+    //pox.update();
+    if(flag_BP == 0)
+    {
+      log_in();
+    }
+    else
+    {
+      if(flag_AddText == 1)
+      {
+        if(sellect_login == 1)
+        {
+          if(save_login == 1)
+          {
+              if(flag_Delete == 1)
+              {
+                  xoa(name_doctor);
+                  flag_Delete = 0;
+              }  
+              else
+                  them(name_doctor,temp);
+          }
+        }
+        else if(sellect_login == 2)
+        {
+          if(save_login == 1)
+          {
+              if(flag_Delete == 1)
+              {
+                  xoa(ID_patient);
+                  flag_Delete = 0;
+              }  
+              else
+                  them(ID_patient,temp);
+          }
+        }
+        flag_AddText = 0;
+      }
+      if(flag_bpnhap == 1)
+      {
+        flag_bpnhap = 0;
+        flag_get_ = 0;
+        BAN_PHIM();
+      }
+      if(flag_Display_login == 1)
+      {
+        log_in();
+        flag_Display_login = 0;
+      }
+      tft.textEnlarge(1);
+      tft.textColor(RA8875_WHITE, RA8875_WHITE);
+      tft.textSetCursor(135, 82);
+      tft.textWrite("                            ");
+      tft.textSetCursor(135, 172);
+      tft.textWrite("                            ");
+      tft.textTransparent(RA8875_BLACK);
+      tft.textSetCursor(135, 82);
+      tft.textWrite(name_doctor);
+      tft.textSetCursor(135, 172);
+      tft.textWrite(ID_patient);
+   }
 }
 void GIAO_DIEN_1(){
+  pox.update();
   tft.textSetCursor(1, 1);
   tft.fillRect(0,20,4,10,RA8875_WHITE);
   tft.fillRect(6,18,4,12,RA8875_WHITE);
@@ -566,6 +691,7 @@ void GIAO_DIEN_1(){
   }
 }
 void Speed_Mode(int x, int y, int h, int w,int level,const char a[]){
+  pox.update();
   tft.drawRect(x,y,h,w,RA8875_WHITE);
   if(level !=0)
     tft.fillRect(x+2,y+2,h-4,w-4,RA8875_BLUE); 
@@ -575,15 +701,18 @@ void Speed_Mode(int x, int y, int h, int w,int level,const char a[]){
   tft.textTransparent(RA8875_WHITE);
   tft.textEnlarge(2);
   tft.textWrite(a);
+  pox.update();
 }
 void GIAO_DIEN_LEVEL()
 {
+  pox.update();
   Speed_Mode(180,295,175,50,Level_1,"Level 1");
   Speed_Mode(380,295,175,50,Level_2,"Level 2");
   Speed_Mode(180,355,175,50,Level_3,"Level 3");
   Speed_Mode(380,355,175,50,Level_4,"Level 4");
 }
 void GIAO_DIEN_2(){
+  pox.update();
   GIAO_DIEN_1();  
   tft.textSetCursor(5, 45);
   tft.textTransparent(RA8875_WHITE);
@@ -610,9 +739,14 @@ void GIAO_DIEN_2(){
   tft.drawRect(10,425,450,50,RA8875_WHITE);
   tft.textSetCursor(20, 420);
   tft.textWrite(string7);
+  tft.drawRect(625,425,175,50,RA8875_WHITE);  
+  tft.textSetCursor(630, 420);
+  tft.textWrite("Logout");
   Infor_Patient();
+  pox.update();
 }
 void GIAO_DIEN_3(){
+  pox.update();
   GIAO_DIEN_1();
   Infor_Patient();
   tft.textSetCursor(10, 50);
@@ -647,6 +781,7 @@ void copy(const char a[],char b[]){
   for(int i = 0; i<leng; i++){
     b[i] = a[i];
   }
+  b[leng] = '\0';
 }
 void phim(int x,int y,char string8){
   tft.drawRect(x,y,80,40,RA8875_WHITE);
@@ -943,6 +1078,7 @@ void nhan(){
 void seclect_level(uint16_t Min_Columns_, uint16_t Max_Columns_, uint16_t Min_Row_, uint16_t Max_Row_,bool* level_, int mode_){
     if(Min_Columns_ < Columns && Columns < Max_Columns_ && Min_Row_ < Row && Row < Max_Row_)
     {
+      pox.update();
       flag_settimer = 1;
       flag_Display = 1;
       flag_change = 1;
@@ -984,15 +1120,58 @@ void seclect_level(uint16_t Min_Columns_, uint16_t Max_Columns_, uint16_t Min_Ro
         timerWrite(timer, 0);
         timerAlarmDisable(timer);
         flag_off = 1;
-      }   
+      }
+      pox.update();
     }
 }
 void Switch_Session(){
     if(contact != 1){
       if(Columns !=0 &&  Row != 0)
       {
-        flag_max30 = 1;
         if(switch_session == 0)
+        {
+            if(133<Columns && Columns<627 && 80<Row && Row<120)
+            {
+                flag_BP = 1;
+                save_login = 1;
+                sellect_login = 1;
+                flag_Display = 1;
+                flag_Display_login = 1;
+                flag_bpnhap = 1;
+                Columns = 0;
+                Row = 0;
+                tft.fillScreen(RA8875_BLACK);
+            }
+            else if(133<Columns && Columns<627 && 170<Row && Row<210)
+            {
+                flag_BP = 1;
+                save_login = 1;
+                sellect_login = 2;
+                flag_Display = 1;
+                flag_Display_login = 1;
+                flag_bpnhap = 1;
+                Columns = 0;
+                Row = 0;
+                tft.fillScreen(RA8875_BLACK);
+            }
+            else if(315<Columns && Columns<485 && 230<Row && Row<270)
+            {
+                Serial.println("login");
+                S_ID_patient = String(ID_patient);
+                S_name_doctor = String(name_doctor);
+                switch_session = 1;
+                flag_DT = 0;
+                flag_Display = 1;
+                flag_bpnhap = 0;
+                flag_get_ = 0;
+                flag_BP = 0;
+                Columns = 0;
+                Row = 0;
+                tft.fillScreen(RA8875_BLACK);
+                Serial.println(S_ID_patient);
+            }
+        }
+        else if(switch_session == 1)
         {
             if(10<Columns && Columns<460 && 425<Row && Row<475)
             {
@@ -1005,6 +1184,14 @@ void Switch_Session(){
             else if(0<Columns && Columns<28 && 0<Row && Row<30)
             {
                 switch_session = 2; //session WIFI
+                flag_Display = 1;
+                Columns = 0;
+                Row = 0;
+                tft.fillScreen(RA8875_BLACK);
+            } 
+            else if(625<Columns && Columns<800 && 425<Row && Row<475)
+            {
+                switch_session = 0; //session WIFI
                 flag_Display = 1;
                 Columns = 0;
                 Row = 0;
@@ -1025,7 +1212,7 @@ void Switch_Session(){
             {
               if(0<Columns && Columns<70 && 0<Row && Row<60)
               {
-                  switch_session = 0;
+                  switch_session = 1;
                   flag_Display = 1;
                   Columns = 0;
                   Row = 0;
@@ -1173,25 +1360,26 @@ void GetData_()
     xoa_toan(Weight);
     xoa_toan(Sex);
     pox.shutdown();
-    Firebase.getString(firebaseData, "/Patient/" + ID_User + "/status");
+    Firebase.getString(firebaseData, "/Patient/" + S_name_doctor + "/" + S_ID_patient + "/name");
     Name_user = firebaseData.stringData();
     Name_user.toCharArray(NamePatient,(Name_user.length()+1));
-//    Firebase.getString(firebaseData, "/Patient/" + ID_User + "/age");
-//    Age_user = firebaseData.stringData();
-//    Age_user.toCharArray(age,(Age_user.length()+1));
-//    Firebase.getString(firebaseData, "/Patient/" + ID_User + "/weight");
-//    Weight_user = firebaseData.stringData();
-//    Weight_user.toCharArray(Weight,(Weight_user.length()+1));
-//    Firebase.getString(firebaseData, "/Patient/" + ID_User + "/gender");
-//    Sex_user = firebaseData.stringData();
-//    Sex_user.toCharArray(Sex,(Sex_user.length()+1));
-//    Firebase.getInt(firebaseData, "/Patient/" + ID_User + "/level");
-//    New_Level = firebaseData.intData();
-//    if (New_Level != Level)
-//    {
-//        Level = New_Level;
-//    }
+    Firebase.getString(firebaseData, "/Patient/" + S_name_doctor + "/" + S_ID_patient + "/age");
+    Age_user = firebaseData.stringData();
+    Age_user.toCharArray(age,(Age_user.length()+1));
+    Firebase.getString(firebaseData, "/Patient/" + S_name_doctor + "/" + S_ID_patient + "/weight");
+    Weight_user = firebaseData.stringData();
+    Weight_user.toCharArray(Weight,(Weight_user.length()+1));
+    Firebase.getString(firebaseData, "/Patient/" + S_name_doctor + "/" + S_ID_patient + "/gender");
+    Sex_user = firebaseData.stringData();
+    Sex_user.toCharArray(Sex,(Sex_user.length()+1));
+    Firebase.getInt(firebaseData, "/Patient/" + S_name_doctor + "/" + S_ID_patient + "/level");
+    New_Level = firebaseData.intData();
+    if (New_Level != Level)
+    {
+        Level = New_Level;
+    }
     pox.resume();
+    pox.update();
 }
 void SendData()
 {
@@ -1200,16 +1388,17 @@ void SendData()
       if((Bpm_ != 0) && (Spo2_ != 0))
       {
            pox.shutdown();
-           Firebase.setFloat(firebaseData, "/Patient/" + ID_User + "/bpm", Bpm_);
-           Firebase.setFloat(firebaseData, "/Patient/" + ID_User + "/spO2", Spo2_);
+           Firebase.setFloat(firebaseData, "/Patient/" + S_name_doctor + "/" + S_ID_patient + "/bpm", Bpm_);
+           Firebase.setFloat(firebaseData, "/Patient/" + S_name_doctor + "/" + S_ID_patient + "/spO2", Spo2_);
            if(90 < Spo2_ && Spo2_ < 96)
            {
              status_ = "Danger" ;
            }
            else 
              status_ = "Normal" ;
-           Firebase.setString(firebaseData, "/Patient/" + ID_User + "/status", status_);
+           Firebase.setString(firebaseData, "/Patient/" + S_name_doctor + "/" + S_ID_patient + "/status", status_);
            pox.resume();
+           pox.update();
       }
     }
 }
@@ -1234,8 +1423,8 @@ void execute_Task(){
     if (millis() - tsLastReport > REPORTING_PERIOD_MS) 
     { 
       get_sensor();
-      canh_bao();
-      if(switch_session == 0)
+//      canh_bao();
+      if(switch_session == 1)
       {
         display_sensor();
       }  
@@ -1244,6 +1433,7 @@ void execute_Task(){
   }
   if(Level != 0)
   {
+    pox.update();
     if(Level == 1)
     {
       cycle_pulse = 211;
@@ -1289,6 +1479,10 @@ void execute_Task(){
     else
     {
       if(switch_session == 0)
+      {
+        enter_login();
+      }
+      if(switch_session == 1)
           GIAO_DIEN_2();
       else if(switch_session == 2)
       {
@@ -1301,11 +1495,6 @@ void execute_Task(){
 }
 void setup()
 {
-  Wire.setClock(400000);
-  Wire.begin();
-  delay(300);
-  touch.setHandler(handleTouch);
-  touchStart();
   pinMode(stepPin,OUTPUT); 
   pinMode(dirPin,OUTPUT);
   pinMode(enPin,OUTPUT);
@@ -1332,7 +1521,13 @@ void setup()
   tft.fillScreen(RA8875_BLACK);
   tft.textMode();
   tft.textEnlarge(5);
-  GIAO_DIEN_2();
+//  GIAO_DIEN_2();
+  log_in();
+  Wire.setClock(400000);
+  Wire.begin();
+  delay(300);
+  touch.setHandler(handleTouch);
+  touchStart();
   Serial.print("Initializing pulse oximeter..");
    if (!pox.begin()) {
        Serial.println("FAILED");
