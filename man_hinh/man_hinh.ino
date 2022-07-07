@@ -56,6 +56,7 @@ int flag_enter_login;
 int sellect_login;
 int save_login;
 int flag_Display_login;
+int send_information;
 char name_doctor[30];
 char ID_patient[7];
 String S_name_doctor;
@@ -624,6 +625,11 @@ void log_in()
   tft.drawRect(133,80,494,40,RA8875_BLACK);
   tft.textSetCursor(130,135);
   tft.textWrite("Enter ID patient");
+  tft.textTransparent(RA8875_BLACK);
+  tft.textSetCursor(135, 82);
+  tft.textWrite(name_doctor);
+  tft.textSetCursor(135, 172);
+  tft.textWrite(ID_patient);
   tft.drawRect(133,170,494,40,RA8875_BLACK);
   tft.drawRect(315,230,170,40,RA8875_BLACK);
   tft.textSetCursor(340,225);
@@ -733,6 +739,8 @@ void GIAO_DIEN_1(){
     tft.textColor(RA8875_WHITE, RA8875_BLACK);
     tft.textSetCursor(30, 15);
     tft.textWrite("                            ");
+    tft.textSetCursor(30, 15);
+    tft.textWrite("no connect");
     pox.update();
   }
 }
@@ -1237,7 +1245,7 @@ void Switch_Session(){
             if(10<Columns && Columns<460 && 425<Row && Row<475)
             {
                 switch_session = 3;
-                update_thongtin = 1; //session update info
+                //update_thongtin = 1; //session update info
                 flag_Display = 1;
                 Columns = 0;
                 Row = 0;
@@ -1405,6 +1413,14 @@ void Switch_Session(){
                 Row = 0;
                 tft.fillScreen(RA8875_BLACK);
             }
+            if(650<Columns && Columns<770 && 400<Row && Row<450)
+            {
+                send_information = 1;
+                flag_Display = 1;
+                Columns = 0;
+                Row = 0;
+                tft.fillScreen(RA8875_BLACK);
+            }
           }
             if(180<Columns && Columns<800 && 95<Row && Row<145)
             {
@@ -1506,6 +1522,20 @@ void GetData_()
     pox.resume();
     pox.update();
 }
+void send_infor()
+{
+    String Name_user = String(NamePatient);
+    String Age_user = String(age);
+    String Weight_user = String(Weight);
+    String Sex_user = String(Sex);
+    pox.shutdown();
+    Firebase.setString(firebaseData, "/Patient/" + S_name_doctor + "/" + S_ID_patient + "/name", Name_user);
+    Firebase.setString(firebaseData, "/Patient/" + S_name_doctor + "/" + S_ID_patient + "/age", Age_user);
+    Firebase.setString(firebaseData, "/Patient/" + S_name_doctor + "/" + S_ID_patient + "/weight", Weight_user);
+    Firebase.setString(firebaseData, "/Patient/" + S_name_doctor + "/" + S_ID_patient + "/gender", Sex_user);
+    pox.resume();
+    pox.update();
+}
 void SendData()
 {
     if(connected_Wifi == 1)
@@ -1593,24 +1623,24 @@ void canh_bao()
   }
 }
 void execute_Task(){
-  touch.loop();
-  delay(100);
-  contact = touch.readInput(rawdata);
-//  if(switch_session == 1)
-//  {
-//    if(WiFi.status() != WL_CONNECTED)
-//    {
-//      pox.update();
-//      connected_Wifi = 0;
-//      tft.textEnlarge(0);
-//      tft.textColor(RA8875_WHITE, RA8875_BLACK);
-//      tft.textSetCursor(30, 15);
-//      tft.textWrite("                            ");
-//      tft.textSetCursor(30, 15);
-//      tft.textWrite("no connect");
-//      pox.update();
-//    }
-//  }
+  if(switch_session == 1)
+  {
+    if(connected_Wifi == 1)
+    {
+      if(WiFi.status() != WL_CONNECTED)
+      {
+        pox.update();
+        connected_Wifi = 0;
+        tft.textEnlarge(0);
+        tft.textColor(RA8875_WHITE, RA8875_BLACK);
+        tft.textSetCursor(30, 15);
+        tft.textWrite("                            ");
+        tft.textSetCursor(30, 15);
+        tft.textWrite("no connect");
+        pox.update();
+      }
+    }
+  }
   if(flag_get_ == 0)
   {
     pox.update();
@@ -1662,6 +1692,11 @@ void execute_Task(){
         //ham update benh nhan
         GetData_();
         update_thongtin = 0;
+      }
+      if(send_information == 1)
+      {
+        send_infor();
+        send_information = 0;
       }
     }
   if(flag_Display == 1)
@@ -1825,4 +1860,7 @@ void setup()
 void loop(){
   execute_Task();
   pox.update();
+  touch.loop();
+  delay(100);
+  contact = touch.readInput(rawdata);
 }
