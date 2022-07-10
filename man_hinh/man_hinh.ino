@@ -176,7 +176,6 @@ void IRAM_ATTR onTimer(){
 void get_SSID(int index,uint16_t Min_Columns_, uint16_t Max_Columns_, uint16_t Min_Row_, uint16_t Max_Row_){
     if(Min_Columns_ < Columns && Columns < Max_Columns_ && Min_Row_ < Row && Row < Max_Row_)
     {
-      //pox.update();
       flag_Display = 1;
       flag_Enter_Pass = 1;
       Min_Columns = 0;
@@ -190,7 +189,6 @@ void get_SSID(int index,uint16_t Min_Columns_, uint16_t Max_Columns_, uint16_t M
     }
 }
 void enter_Pass(char SSID_[]){
-//   pox.update();
    tft.fillRect(100,5,600,290,RA8875_WHITE);
    if(flag_connect == 0){
       tft.textEnlarge(2);
@@ -215,7 +213,6 @@ void enter_Pass(char SSID_[]){
    }
    else
    {
-      pox.update();
       int i;
       tft.textEnlarge(2);
       tft.textTransparent(RA8875_BLACK);
@@ -229,7 +226,6 @@ void enter_Pass(char SSID_[]){
       tft.drawRect(130,220,150,50,RA8875_BLACK);
       tft.textSetCursor(133,220);
       tft.textWrite("Cancel");
-      pox.shutdown();
       WiFi.begin(SSID_Temp,password);
       for(int a = 0; a<20; a++){
         delay(500);
@@ -241,8 +237,6 @@ void enter_Pass(char SSID_[]){
         else
           i = 0; 
       }
-      pox.resume();
-      pox.update();
       xoa_toan(password);
       tft.textEnlarge(2);
       tft.textColor(RA8875_BLACK, RA8875_WHITE);
@@ -267,7 +261,6 @@ void connect_Wifi(){
   if(flag_Wifi == 1){
     if(connected_Wifi == 0){
       for (int i = 0; i < n; ++i) {
-        pox.update();
         Serial.println("dang thu hien");
         set_cursor(610,790,(i+1)*58,(i+1)*58+50);
         get_SSID(i,Min_Columns,Max_Columns,Min_Row,Max_Row);
@@ -287,7 +280,6 @@ void connect_Wifi(){
         connected_Wifi = 0;
         Columns = 0;
         Row = 0;
-        //xoa_toan(SSID_Temp);
         xoa_toan(password);
         tft.fillScreen(RA8875_BLACK);
       }
@@ -300,7 +292,6 @@ void wifi_(){
       {
         if(flag_BP == 0)
         {
-          pox.update();
           tft.fillRect(100,5,600,290,RA8875_WHITE);
           tft.textEnlarge(2);
           tft.textTransparent(RA8875_BLACK);
@@ -321,7 +312,6 @@ void wifi_(){
           tft.textTransparent(RA8875_BLACK);
           tft.textSetCursor(137,157);
           tft.textWrite(SSID_Temp);
-          pox.update();
         }
         else
         {
@@ -347,7 +337,6 @@ void wifi_(){
           }
           if(flag_Display_ssid == 1)
           {
-            pox.update();
             tft.fillRect(100,5,600,290,RA8875_WHITE);
             tft.textEnlarge(2);
             tft.textTransparent(RA8875_BLACK);
@@ -369,30 +358,25 @@ void wifi_(){
             tft.textSetCursor(137,157);
             tft.textWrite(SSID_Temp);
             flag_Display_ssid = 0;
-            pox.update();
           }
-          pox.update();
           tft.textEnlarge(2);
           tft.textColor(RA8875_BLACK, RA8875_WHITE);
           tft.textSetCursor(137,156);
-          tft.textWrite("                      ");
+          tft.textWrite("                  ");
           tft.textTransparent(RA8875_BLACK);
           tft.textSetCursor(137,157);
           tft.textWrite(SSID_Temp);
           tft.textWrite("_");
-          pox.update();
         }
       }
       else
       {
-        pox.update();
         tft.textEnlarge(2);
         tft.textTransparent(RA8875_WHITE);
         tft.textSetCursor(0,0);
         tft.textWrite("<- WI-FI");
         tft.drawRect(695,0,100,40,RA8875_WHITE);
         if(flag_Wifi == 1){
-          pox.update();
           tft.drawRect(460,0,230,40,RA8875_WHITE);
           tft.textEnlarge(1);
           tft.textSetCursor(462,0);
@@ -402,7 +386,6 @@ void wifi_(){
           tft.fillRect(745,2,48,36,RA8875_WHITE);
           if(connected_Wifi == 0)
           {
-            pox.shutdown();
             WiFi.disconnect();
             n = WiFi.scanNetworks();
             if(n == 0)
@@ -429,12 +412,9 @@ void wifi_(){
                 tft.textWrite(SSID_[i]);
                 delay(100);
               }  
-              pox.resume(); 
-              pox.update();
           }
           else
           {
-                pox.update();
                 tft.textSetCursor(10, 58);
                 tft.textWrite(SSID_Temp);
                 tft.drawRect(550,58,250,50,RA8875_WHITE);
@@ -443,7 +423,6 @@ void wifi_(){
           }
         }
         else{
-          pox.update();
           tft.fillRect(697,2,96,36,RA8875_BLACK);
           tft.fillRect(697,2,48,36,RA8875_WHITE);
           tft.textSetCursor(50,100);
@@ -452,7 +431,6 @@ void wifi_(){
           tft.textWrite("Turn on WI-FI to connect");
           tft.textSetCursor(50,190);
           tft.textWrite("to an available WI-FI network.");
-          pox.update();
         }
       }
   } 
@@ -487,7 +465,7 @@ void wifi_(){
           tft.textEnlarge(2);
           tft.textColor(RA8875_BLACK, RA8875_WHITE);
           tft.textSetCursor(137,156);
-          tft.textWrite("                      ");
+          tft.textWrite("                  ");
           tft.textTransparent(RA8875_BLACK);
           tft.textSetCursor(137,157);
           tft.textWrite(password);
@@ -602,7 +580,6 @@ void Infor_Patient(){
 }
 void log_in()
 {
-  //pox.update();
   tft.textEnlarge(1);
   tft.textColor(RA8875_WHITE, RA8875_WHITE);
   tft.textSetCursor(135, 82);
@@ -1244,8 +1221,9 @@ void Switch_Session(){
         {
             if(10<Columns && Columns<460 && 425<Row && Row<475)
             {
+                pox.shutdown();
                 switch_session = 3;
-                //update_thongtin = 1; //session update info
+//                update_thongtin = 1; //session update info
                 flag_Display = 1;
                 Columns = 0;
                 Row = 0;
@@ -1253,6 +1231,7 @@ void Switch_Session(){
             }
             else if(0<Columns && Columns<28 && 0<Row && Row<30)
             {
+                pox.shutdown();
                 switch_session = 2; //session WIFI
                 flag_Display = 1;
                 Columns = 0;
@@ -1282,6 +1261,8 @@ void Switch_Session(){
             {
               if(0<Columns && Columns<70 && 0<Row && Row<60)
               {
+                  pox.resume(); 
+                  pox.update();
                   switch_session = 1;
                   flag_Display = 1;
                   Columns = 0;
@@ -1407,6 +1388,8 @@ void Switch_Session(){
           {
             if(10<Columns && Columns<130 && 400<Row && Row<450)
             {
+                pox.resume(); 
+                pox.update();
                 switch_session = 1; //session update info
                 flag_Display = 1;
                 Columns = 0;
@@ -1528,13 +1511,13 @@ void send_infor()
     String Age_user = String(age);
     String Weight_user = String(Weight);
     String Sex_user = String(Sex);
-    pox.shutdown();
+//    pox.shutdown();
     Firebase.setString(firebaseData, "/Patient/" + S_name_doctor + "/" + S_ID_patient + "/name", Name_user);
     Firebase.setString(firebaseData, "/Patient/" + S_name_doctor + "/" + S_ID_patient + "/age", Age_user);
     Firebase.setString(firebaseData, "/Patient/" + S_name_doctor + "/" + S_ID_patient + "/weight", Weight_user);
     Firebase.setString(firebaseData, "/Patient/" + S_name_doctor + "/" + S_ID_patient + "/gender", Sex_user);
-    pox.resume();
-    pox.update();
+//    pox.resume();
+//    pox.update();
 }
 void SendData()
 {
@@ -1623,6 +1606,9 @@ void canh_bao()
   }
 }
 void execute_Task(){
+  touch.loop();
+  delay(100);
+  contact = touch.readInput(rawdata);
   if(switch_session == 1)
   {
     if(connected_Wifi == 1)
@@ -1840,7 +1826,6 @@ void setup()
   tft.fillScreen(RA8875_BLACK);
   tft.textMode();
   tft.textEnlarge(5);
-//  GIAO_DIEN_2();
   log_in();
   Wire.setClock(400000);
   Wire.begin();
@@ -1854,13 +1839,8 @@ void setup()
        Serial.println("SUCCESS");
    }
   pox.setOnBeatDetectedCallback(onBeatDetected);
-//  GIAO_DIEN_3();
-//  BAN_PHIM();
 }
 void loop(){
   execute_Task();
   pox.update();
-  touch.loop();
-  delay(100);
-  contact = touch.readInput(rawdata);
 }
